@@ -28,3 +28,9 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+
+# .idea files
+.idea/.gitignore
+.idea/ElectionProject.iml
+.idea/modules.xml
+.idea/vcs.xml
