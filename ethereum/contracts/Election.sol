@@ -9,10 +9,23 @@ contract ElectionFactory {
     address[] public deployedElections;
     address public admin;
 
-    function createElection(bytes32[] memory candidateNameList, uint totalVoters) public {
+    constructor(){
         admin = msg.sender;
-        address newElection = address(new Election(candidateNameList, totalVoters, admin));
+    }
+
+    function createElection(string[] memory candidateNameList, uint numberOfTokens) public restricted {
+        address newElection = address(new Election(candidateNameList, admin));
         deployedElections.push(newElection);
+        mintTokens(numberOfTokens);
+    }
+
+    function mintTokens(uint numberOfTokens) public restricted {
+
+    }
+
+    modifier restricted() {
+        require(msg.sender == admin, "Only the admin can access this function");
+        _;
     }
 
     function getDeployedElections() public view returns (address[] memory) {
@@ -27,25 +40,22 @@ contract ElectionFactory {
 contract Election {
 
     struct Candidate {
-        bytes32 name;   // short name (up to 32 bytes)
+        string name;
         uint voteCount; // number of accumulated votes
     }
 
     address public admin;
     mapping(address => bool) public voters;
     mapping(uint => Candidate) public candidateList;
-
     uint public voterCount;
-    uint public totalVoterCount;
     uint public candidateCount;
 
     /**
      * @dev Create a new ballot to choose one of 'candidateNameList'.
      * @param candidateNameList names of candidateList
      */
-    constructor(bytes32[] memory candidateNameList, uint totalVoters, address adminAddress) {
+    constructor(string[] memory candidateNameList, address adminAddress) {
         admin = adminAddress;
-        totalVoterCount = totalVoters;
         for (uint i = 0; i < candidateNameList.length; i++) {
             candidateList[i] = Candidate({
             name : candidateNameList[i],
@@ -62,6 +72,7 @@ contract Election {
     function vote(uint candidateIndex) public {
         require(!voters[msg.sender], "Already voted.");
         voters[msg.sender] = true;
+        voterCount++;
         candidateList[candidateIndex].voteCount ++;
     }
 
@@ -83,7 +94,7 @@ contract Election {
      * @dev Calls winningCandidate() function to get the index of the winner contained in the candidateList array and then
      * @return winnerName_ the name of the winner
      */
-    function winnerName() public view returns (bytes32 winnerName_){
+    function winnerName() public view returns (string memory winnerName_){
         winnerName_ = candidateList[winningCandidate()].name;
     }
 }
