@@ -13,14 +13,14 @@ class ElectionList extends Component {
 
     componentDidMount() {
         this.getContractData().then((data) => {
-            this.setState({electionData: data.campaigns, account: data.accounts[0]});
+            this.setState({electionData: data.elections, account: data.accounts[0]});
         });
     }
 
     async getContractData() {
         let accounts = await web3.eth.getAccounts();
-        const campaigns = await factory.methods.getDeployedElections().call();
-        return {campaigns, accounts};
+        const elections = await factory.methods.getDeployedElections().call();
+        return {elections, accounts};
     }
 
     renderElectionList(electionList) {
@@ -29,7 +29,7 @@ class ElectionList extends Component {
                 header: address,
                 description: (
                     <Link route={`/elections/${address}`}>
-                        <a>View Campaign</a>
+                        <a>View Election</a>
                     </Link>
                 ), fluid: true
             };
