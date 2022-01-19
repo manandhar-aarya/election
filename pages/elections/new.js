@@ -19,8 +19,8 @@ class NewElection extends Component {
 
         try {
             const accounts = await web3.eth.requestAccounts();
-            await factory.methods //(bytes32[] memory candidateNameList, uint totalVoters
-                .createElection(["aarya", "manandhar"] ,30)
+            await factory.methods
+                .createElection("National Presidential Elections", ["aarya", "manandhar"], 30)
                 .send({
                     from: accounts[0]
                 });

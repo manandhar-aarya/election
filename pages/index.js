@@ -20,17 +20,18 @@ class ElectionList extends Component {
     async getContractData() {
         let accounts = await web3.eth.getAccounts();
         const elections = await factory.methods.getDeployedElections().call();
+        console.log(elections)
         const admin = await factory.methods.admin.call().call();
         console.log(admin)
         return {elections, accounts};
     }
 
     renderElectionList(electionList) {
-        const items = electionList.map(address => {
+        const items = electionList.map(deployedElection => {
             return {
-                header: address,
+                header: deployedElection.name,
                 description: (
-                    <Link route={`/elections/${address}`}>
+                    <Link route={`/elections/${deployedElection.electionAddress}`}>
                         <a>View Election</a>
                     </Link>
                 ), fluid: true

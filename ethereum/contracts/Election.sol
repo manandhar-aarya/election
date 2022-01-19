@@ -6,16 +6,25 @@ pragma solidity >=0.7.0 <0.9.0;
  * @dev Implements creation of multiple elections
  */
 contract ElectionFactory {
-    address[] public deployedElections;
+    struct DeployedElection {
+        string name;
+        address electionAddress;
+    }
+
+    DeployedElection[] public deployedElections;
     address public admin;
 
     constructor(){
         admin = msg.sender;
     }
 
-    function createElection(string[] memory candidateNameList, uint numberOfTokens) public restricted {
-        address newElection = address(new Election(candidateNameList, admin));
-        deployedElections.push(newElection);
+    function createElection(string memory electionName, string[] memory candidateNameList, uint numberOfTokens) public restricted {
+        address newElection = address(new Election(electionName, candidateNameList, admin));
+        DeployedElection memory elect = DeployedElection({
+        name : electionName,
+        electionAddress : newElection
+        });
+        deployedElections.push(elect);
         mintTokens(numberOfTokens);
     }
 
@@ -28,7 +37,7 @@ contract ElectionFactory {
         _;
     }
 
-    function getDeployedElections() public view returns (address[] memory) {
+    function getDeployedElections() public view returns (DeployedElection[] memory) {
         return deployedElections;
     }
 }
@@ -38,7 +47,6 @@ contract ElectionFactory {
  * @dev Implements voting process
  */
 contract Election {
-
     struct Candidate {
         string name;
         uint voteCount; // number of accumulated votes
@@ -49,12 +57,14 @@ contract Election {
     mapping(uint => Candidate) public candidateList;
     uint public voterCount;
     uint public candidateCount;
+    string public name;
 
     /**
      * @dev Create a new ballot to choose one of 'candidateNameList'.
      * @param candidateNameList names of candidateList
      */
-    constructor(string[] memory candidateNameList, address adminAddress) {
+    constructor(string memory electionName, string[] memory candidateNameList, address adminAddress) {
+        name = electionName;
         admin = adminAddress;
         for (uint i = 0; i < candidateNameList.length; i++) {
             candidateList[i] = Candidate({

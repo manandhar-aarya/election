@@ -19,9 +19,9 @@ class ElectionShow extends Component {
     }
 
     async getContractData() {
-        console.log(this.props.query)
         const election = Election(this.props.query.address);
         const voterCount = await election.methods.voterCount.call().call()
+        // const name = await election.methods.voterCount.call().call() todo show name
         const candidateCount = await election.methods.candidateCount.call().call()
         const candidates = []
         for (let i = 0; i < candidateCount; i++) {
