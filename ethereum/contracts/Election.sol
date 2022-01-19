@@ -25,7 +25,7 @@ contract ElectionFactory {
     }
 
     function createElection(string memory electionName, string[] memory candidateNameList, uint numberOfTokens) public restricted payable {
-        address newElection = address(new Election(electionName, candidateNameList, admin));
+        address newElection = address(new Election(electionName, candidateNameList, admin, vendorAddress));
         DeployedElection memory elect = DeployedElection({
         name : electionName,
         electionAddress : newElection
@@ -62,12 +62,13 @@ contract Election {
     uint public voterCount;
     uint public candidateCount;
     string public name;
+    Vendor vendor;
 
     /**
      * @dev Create a new ballot to choose one of 'candidateNameList'.
      * @param candidateNameList names of candidateList
      */
-    constructor(string memory electionName, string[] memory candidateNameList, address adminAddress) {
+    constructor(string memory electionName, string[] memory candidateNameList, address adminAddress, address vendorAddress) {
         name = electionName;
         admin = adminAddress;
         for (uint i = 0; i < candidateNameList.length; i++) {
@@ -77,6 +78,7 @@ contract Election {
             });
         }
         candidateCount = candidateNameList.length;
+        vendor = Vendor(vendorAddress);
     }
 
     /**
@@ -88,6 +90,7 @@ contract Election {
         voters[msg.sender] = true;
         voterCount++;
         candidateList[candidateIndex].voteCount ++;
+        vendor.giveVotedToken(msg.sender);
     }
 
     /**
@@ -131,7 +134,7 @@ contract IVotedToken is IERC20 {
 
     mapping(address => uint256) balances;
 
-    uint256 totalSupply_;
+    uint256 public totalSupply_;
 
     using SafeMath for uint256;
 
@@ -204,35 +207,52 @@ contract Vendor {
     }
 
     function mintTokens(uint256 numberOfTokens, address sender) public payable returns (bool) {
-        require(sender == admin, "Only the admin can mint token of vendor");
+        require(sender == admin, "Only the admin can mint tokens");
 
         require(msg.value > 0, "Send ETH to mint tokens");
 
-        require(msg.value >= numberOfTokens / tokensPerEth, "Sent ETH not enough to buy tokens");
+        require(msg.value >= (numberOfTokens / tokensPerEth), "Sent ETH not enough to mint tokens");
 
         (bool mint) = token.mintTokens(numberOfTokens, address(this), sender);
         require(mint, "Failed to mint tokens");
         return true;
     }
 
+    function giveVotedToken(address receiver) public returns (bool) {
+        uint256 vendorBalance = token.balanceOf(address(this));
+        require(vendorBalance >= 1, "Vendor contract does not have enough tokens in its balance");
+
+        (bool sent) = token.transfer(receiver, 1);
+        require(sent, "Failed to transfer token to user");
+        return true;
+    }
+
+    function balanceOf(address tokenOwner) public view returns (uint256) {
+        return token.balanceOf(tokenOwner);
+    }
+
+    function totalSupply() public view returns (uint256) {
+        return token.totalSupply();
+    }
 
     /**
     * @dev Allow users to buy token for ETH
     */
-    function buyTokens() public payable returns (uint256 tokenAmount) {
+    function buyTokens(uint256 numberOfTokens) public payable returns (uint256 tokenAmount) {
         require(msg.value > 0, "Send ETH to buy some tokens");
 
-        uint256 amountToBuy = msg.value * tokensPerEth;
+        uint256 ethAmount = numberOfTokens / tokensPerEth;
+        require(msg.value > ethAmount, "Sent ETH not enough to buy tokens");
 
         // check if the Vendor Contract has enough amount of tokens for the transaction
         uint256 vendorBalance = token.balanceOf(address(this));
-        require(vendorBalance >= amountToBuy, "Vendor contract has not enough tokens in its balance");
+        require(vendorBalance > numberOfTokens, "Vendor contract does not have enough tokens in its balance");
 
         // Transfer token to the msg.sender
-        (bool sent) = token.transfer(msg.sender, amountToBuy);
+        (bool sent) = token.transfer(msg.sender, numberOfTokens);
         require(sent, "Failed to transfer token to user");
 
-        return amountToBuy;
+        return numberOfTokens;
     }
 
     /**
@@ -243,10 +263,10 @@ contract Vendor {
 
         uint256 ethAmount = numberOfTokens / tokensPerEth;
         uint256 vendorBalance = address(this).balance;
-        require(vendorBalance >= ethAmount, "Vendor contract does not have enough balance");
+        require(vendorBalance > ethAmount, "Vendor contract does not have enough balance");
 
-        // deduct tokens from user's balance
-        (bool sent) = token.transfer(address(this), numberOfTokens);
+        // deduct tokens from msg.sender's balance
+        (bool sent) = token.transferFrom(msg.sender, address(this), numberOfTokens);
         require(sent, "Failed to transfer token to contract");
 
         // transfer ETH to the user
@@ -257,9 +277,9 @@ contract Vendor {
     * @dev Allow the admin of the contract to withdraw ETH
     */
     function withdraw(address sender) public {
-        require(sender == admin, "Only the admin can mint token of vendor");
+        require(sender == admin, "Only the admin can mint tokens");
         uint256 ownerBalance = address(this).balance;
-        require(ownerBalance > 0, "Owner has not balance to withdraw");
+        require(ownerBalance > 0, "Owner does not have  balance to withdraw");
 
         (bool sent,) = msg.sender.call{value : address(this).balance}("");
         require(sent, "Failed to send user balance back to the owner");

@@ -4,14 +4,14 @@ import { Link } from '../routes';
 
 export default () => {
   return (
-    <Menu style={{ marginTop: '10px' }}>
+    <Menu style={{ marginTop: '16px' }}>
       <Link route="/">
         <a className="item">Elections</a>
       </Link>
 
       <Menu.Menu position="right">
-        <Link route="/">
-          <a className="item">Elections</a>
+        <Link route="/profile">
+          <a className="item">My Tokens</a>
         </Link>
 
         <Link route="/elections/new">

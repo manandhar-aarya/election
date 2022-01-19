@@ -21,13 +21,12 @@ class ElectionList extends Component {
     async getContractData() {
         let accounts = await web3.eth.getAccounts();
         const elections = await factory.methods.getDeployedElections().call();
-        console.log(elections)
-        const admin = await factory.methods.admin.call().call();
-        console.log("factory admin: ", admin)
         const vendorAddress = await factory.methods.vendorAddress.call().call();
-        console.log("vendor address: ", vendorAddress)
-        const vendorAdmin = await Vendor(vendorAddress).methods.admin.call().call();
-        console.log("vendor admin: ", vendorAdmin)
+        const totalSupply = await Vendor(vendorAddress).methods.totalSupply().call();
+        console.log("total token Supply: " , totalSupply)
+        const balance1 = await web3.eth.getBalance(vendorAddress);
+        console.log("eth balance:" , web3.utils.fromWei(balance1, 'ether'));
+
         return {elections, accounts};
     }
 

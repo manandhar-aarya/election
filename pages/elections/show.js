@@ -8,15 +8,17 @@ class ElectionShow extends Component {
     static getInitialProps({query}) {
         return {query}
     }
+
     state = {
-        value: '', errorMessage: '', loading: false, candidateList: [], voterCount: 0, name:""
+        value: '', errorMessage: '', loading: false, candidateList: [], voterCount: 0, name: ""
     };
 
     componentDidMount() {
         this.getContractData().then((data) => {
-            this.setState({candidateList: data.candidateList, voterCount: data.voterCount, name:data.name});
+            this.setState({candidateList: data.candidateList, voterCount: data.voterCount, name: data.name});
         });
     }
+
     //todo show contract error elegantly
 
     async getContractData() {
@@ -31,7 +33,7 @@ class ElectionShow extends Component {
         }
 
         return {
-            name:name,
+            name: name,
             candidateList: candidates,
             voterCount: voterCount,
         };
@@ -64,20 +66,14 @@ class ElectionShow extends Component {
     }
 
     render() {
-
-
         return (
             <Layout>
                 <h3>{this.state.name}</h3>
                 <Grid>
                     <Grid.Row>
                         <Grid.Column width={10}>{this.renderCards()}</Grid.Column>
-
-                        {/*<Grid.Column width={6}>*/}
-                        {/*    <ContributeForm address={ this.props.query.address} />*/}
-                        {/*</Grid.Column>*/}
                     </Grid.Row>
-                    <Button primary onClick={this.onVote}>View Requests</Button>
+                    <Button primary onClick={this.onVote}>Vote!</Button>
 
                 </Grid>
             </Layout>
