@@ -9,19 +9,20 @@ class ElectionShow extends Component {
         return {query}
     }
     state = {
-        value: '', errorMessage: '', loading: false, candidateList: [], voterCount: 0
+        value: '', errorMessage: '', loading: false, candidateList: [], voterCount: 0, name:""
     };
 
     componentDidMount() {
         this.getContractData().then((data) => {
-            this.setState({candidateList: data.candidateList, voterCount: data.voterCount});
+            this.setState({candidateList: data.candidateList, voterCount: data.voterCount, name:data.name});
         });
     }
+    //todo show contract error elegantly
 
     async getContractData() {
         const election = Election(this.props.query.address);
         const voterCount = await election.methods.voterCount.call().call()
-        // const name = await election.methods.voterCount.call().call() todo show name
+        const name = await election.methods.name.call().call()
         const candidateCount = await election.methods.candidateCount.call().call()
         const candidates = []
         for (let i = 0; i < candidateCount; i++) {
@@ -30,6 +31,7 @@ class ElectionShow extends Component {
         }
 
         return {
+            name:name,
             candidateList: candidates,
             voterCount: voterCount,
         };
@@ -55,7 +57,6 @@ class ElectionShow extends Component {
                 , fluid: true
             };
         })
-
         return <div>
             <Card.Group items={items}/>
             <Card.Group items={candidates}/>
@@ -67,7 +68,7 @@ class ElectionShow extends Component {
 
         return (
             <Layout>
-                <h3>Election Details</h3>
+                <h3>{this.state.name}</h3>
                 <Grid>
                     <Grid.Row>
                         <Grid.Column width={10}>{this.renderCards()}</Grid.Column>

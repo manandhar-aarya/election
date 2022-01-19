@@ -20,9 +20,10 @@ class NewElection extends Component {
         try {
             const accounts = await web3.eth.requestAccounts();
             await factory.methods
-                .createElection("National Presidential Elections", ["aarya", "manandhar"], 30)
+                .createElection("National Presidential Elections", ["aarya", "manandhar"], 1)
                 .send({
-                    from: accounts[0]
+                    from: accounts[0],
+                    value: web3.utils.toWei("0.1", 'ether')
                 });
 
             Router.pushRoute('/');

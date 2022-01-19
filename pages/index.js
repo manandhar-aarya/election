@@ -5,6 +5,7 @@ import factory from '../ethereum/factory';
 import Layout from '../components/Layout';
 import web3 from '../ethereum/web3';
 import {Link} from '../routes';
+import Vendor from '../ethereum/vendor';
 
 class ElectionList extends Component {
     state = {
@@ -22,7 +23,11 @@ class ElectionList extends Component {
         const elections = await factory.methods.getDeployedElections().call();
         console.log(elections)
         const admin = await factory.methods.admin.call().call();
-        console.log(admin)
+        console.log("factory admin: ", admin)
+        const vendorAddress = await factory.methods.vendorAddress.call().call();
+        console.log("vendor address: ", vendorAddress)
+        const vendorAdmin = await Vendor(vendorAddress).methods.admin.call().call();
+        console.log("vendor admin: ", vendorAdmin)
         return {elections, accounts};
     }
 
