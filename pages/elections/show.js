@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Card, Grid, Button} from 'semantic-ui-react';
+import {Card, Grid, Button, Message, Form} from 'semantic-ui-react';
 import Layout from '../../components/Layout';
 import Election from '../../ethereum/election';
 import web3 from '../../ethereum/web3';
@@ -52,11 +52,17 @@ class ElectionShow extends Component {
             }
         ];
 
-        const candidates = candidateList.map((candidate) => {
+        const candidates = candidateList.map((candidate, index) => {
             return {
                 header: candidate.name,
-                description: "Number of votes: " + candidate.voteCount
-                , fluid: true
+                description: (
+                    <div>
+                        <h4> Number of votes: {candidate.voteCount}</h4>
+                        <Button loading={this.state.loading} primary
+                                onClick={() => this.onVote(index, this)}>Vote</Button>
+                    </div>
+                ),
+                fluid: true
             };
         })
         return <div>
@@ -70,27 +76,30 @@ class ElectionShow extends Component {
             <Layout>
                 <h3>{this.state.name}</h3>
                 <Grid>
-                    <Grid.Row>
-                        <Grid.Column width={10}>{this.renderCards()}</Grid.Column>
-                    </Grid.Row>
-                    <Button primary onClick={this.onVote}>Vote!</Button>
-
+                    <Grid.Column width={10}>{this.renderCards()}</Grid.Column>
                 </Grid>
+                <br/><br/>
+                <Form error={!!this.state.errorMessage}>
+                    <Message error header="Oops!" content={this.state.errorMessage}/>
+                </Form>
             </Layout>
         );
     }
 
-    onVote = async () => {
+    onVote = async (index, context) => {
+        context.setState({loading: true, errorMessage: ''});
         try {
-            console.log("vote")
-            const election = Election(this.props.query.address);
+            const election = Election(context.props.query.address);
             const accounts = await web3.eth.requestAccounts();
-            await election.methods.vote(0).send({
+            await election.methods.vote(index).send({
                 from: accounts[0]
             });
         } catch (err) {
             console.log(err);
+            context.setState({errorMessage: err.message});
         }
+        context.componentDidMount()
+        context.setState({loading: false});
     }
 }
 

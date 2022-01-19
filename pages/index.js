@@ -23,10 +23,9 @@ class ElectionList extends Component {
         const elections = await factory.methods.getDeployedElections().call();
         const vendorAddress = await factory.methods.vendorAddress.call().call();
         const totalSupply = await Vendor(vendorAddress).methods.totalSupply().call();
-        console.log("total token Supply: " , totalSupply)
+        console.log("total token Supply: ", totalSupply)
         const balance1 = await web3.eth.getBalance(vendorAddress);
-        console.log("eth balance:" , web3.utils.fromWei(balance1, 'ether'));
-
+        console.log("eth balance:", web3.utils.fromWei(balance1, 'ether'));
         return {elections, accounts};
     }
 
@@ -34,11 +33,10 @@ class ElectionList extends Component {
         const items = electionList.map(deployedElection => {
             return {
                 header: deployedElection.name,
-                description: (
-                    <Link route={`/elections/${deployedElection.electionAddress}`}>
-                        <a>View Election</a>
-                    </Link>
-                ), fluid: true
+                description: (<Link route={`/elections/${deployedElection.electionAddress}`}>
+                    <a>View Election</a>
+                </Link>),
+                fluid: true
             };
         });
 
@@ -52,34 +50,15 @@ class ElectionList extends Component {
         }
         return <div>
             <Label>Current account : {accounts}</Label>
+            <br/><br/>
             <Card.Group items={items}/>
         </div>;
 
     }
 
-    account = "";
-    onSubmit = () => {
-        this.saveData().then(() => {
-            this.setState({account: this.account});
-        })
-    };
-
-    async saveData() {
-        try {
-            const accounts = await web3.eth.requestAccounts();
-            this.account = accounts[0];
-            console.log(accounts[0])
-        } catch (err) {
-            console.log(err);
-        }
-    }
-
     render() {
         return (<Layout>
             <div>
-                <Button onClick={this.onSubmit}>
-                    log address
-                </Button>
                 {this.renderElectionList(this.state.electionData)}
             </div>
         </Layout>);

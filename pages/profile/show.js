@@ -98,6 +98,7 @@ class ProfileShow extends Component {
         } catch (err) {
             this.setState({ errorMessage: err.message });
         }
+        this.componentDidMount()
     }
 
     onSell = async () => {
@@ -109,6 +110,7 @@ class ProfileShow extends Component {
         } catch (err) {
             this.setState({ errorMessage: err.message });
         }
+        this.componentDidMount()
     }
 }
 
