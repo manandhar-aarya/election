@@ -39,11 +39,8 @@ class ProfileShow extends Component {
         const vendor = await Vendor(vendorAddress);
         const balance = await vendor.methods.balanceOf(accounts[0]).call();
         const vendorBalance = await vendor.methods.balanceOf(vendorAddress).call();
-        const tokensPerEth = await vendor.methods.tokensPerEth.call().call();
-        let pricePerToken = 0;
-        if (tokensPerEth) {
-            pricePerToken = 1 / Number( tokensPerEth);
-        }
+        let pricePerToken = await vendor.methods.priceInWei.call().call();
+        pricePerToken = web3.utils.fromWei(pricePerToken, 'ether')
         return {
             vendorBalance: vendorBalance,
             vendorAddress: vendorAddress,
@@ -82,7 +79,6 @@ class ProfileShow extends Component {
         </Layout>);
     }
 
-    // todo check if i need to add gas amount
     onBuy = async () => {
         const balance = Number(this.state.vendorBalance);
         const tokens = Number(this.state.tokensToBuy);

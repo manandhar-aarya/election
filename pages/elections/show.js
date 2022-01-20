@@ -19,8 +19,6 @@ class ElectionShow extends Component {
         });
     }
 
-    //todo show contract error elegantly
-
     async getContractData() {
         const election = Election(this.props.query.address);
         const voterCount = await election.methods.voterCount.call().call()

@@ -1,11 +1,13 @@
 const HDWalletProvider = require("@truffle/hdwallet-provider");
+const ganache = require('ganache-cli');
 const Web3 = require('web3');
-const compiledFactory = require('./build_new/CampaignFactory.json');
+const compiledFactory = require('./build/ElectionFactory.json');
 
 const provider = new HDWalletProvider(
     "divide edge tilt sister ten total cannon garment photo edge dream fire",
     "https://rinkeby.infura.io/v3/95d9e004f77548fdbdd9980deddb5f43"
 );
+// const provider = ganache.provider();
 const web3 = new Web3(provider);
 
 const deploy = async () => {

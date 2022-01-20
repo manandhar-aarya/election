@@ -193,8 +193,8 @@ contract Vendor {
     // Token Contract
     IVotedToken token;
 
-    // token price for ETH
-    uint256 public tokensPerEth = 100;
+    // token price in wei
+    uint256 public priceInWei = 1000000000000000; // = 0.001 ether
 
     constructor(address tokenAddress, address adminAddress) payable {
         admin = adminAddress;
@@ -206,7 +206,7 @@ contract Vendor {
 
         require(msg.value > 0, "Send ETH to mint tokens");
 
-        require((msg.value / 1e18) >= (numberOfTokens / tokensPerEth), "Sent ETH not enough to mint tokens");
+        require(msg.value >= numberOfTokens * priceInWei, "Sent ETH not enough to mint tokens");
 
         (bool mint) = token.mintTokens(numberOfTokens, address(this), sender);
         require(mint, "Failed to mint tokens");
@@ -236,8 +236,8 @@ contract Vendor {
     function buyTokens(uint256 numberOfTokens) public payable returns (uint256 tokenAmount) {
         require(msg.value > 0, "Send ETH to buy some tokens");
 
-        uint256 ethAmount = numberOfTokens / tokensPerEth;
-        require((msg.value / 1e18) >= ethAmount, "Sent ETH not enough to buy tokens");
+        uint256 weiAmount = numberOfTokens * priceInWei;
+        require(msg.value >= weiAmount, "Sent ETH not enough to buy tokens");
 
         // check if the Vendor Contract has enough amount of tokens for the transaction
         uint256 vendorBalance = token.balanceOf(address(this));
@@ -256,16 +256,16 @@ contract Vendor {
     function sellTokens(uint256 numberOfTokens) public {
         require(token.balanceOf(msg.sender) >= numberOfTokens, "User does not have enough tokens to sell");
 
-        uint256 ethAmount = numberOfTokens / tokensPerEth;
+        uint256 weiAmount = numberOfTokens * priceInWei;
         uint256 vendorBalance = address(this).balance;
-        require(vendorBalance > ethAmount, "Vendor contract does not have enough balance");
+        require(vendorBalance > weiAmount, "Vendor contract does not have enough balance");
 
         // deduct tokens from msg.sender's balance
         (bool sent) = token.transferFrom(msg.sender, address(this), numberOfTokens);
         require(sent, "Failed to transfer token to contract");
 
         // transfer ETH to the user
-        payable(msg.sender).transfer(ethAmount * 1e18);
+        payable(msg.sender).transfer(weiAmount * 1e18);
     }
 
     /**

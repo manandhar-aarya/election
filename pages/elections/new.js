@@ -29,11 +29,8 @@ class NewElection extends Component {
     async getContractData() {
         const vendorAddress = await factory.methods.vendorAddress.call().call();
         const vendor = await Vendor(vendorAddress);
-        const tokensPerEth = await vendor.methods.tokensPerEth.call().call();
-        let pricePerToken = 0;
-        if (tokensPerEth) {
-            pricePerToken = 1 / Number(tokensPerEth);
-        }
+        let pricePerToken = await vendor.methods.priceInWei.call().call();
+        pricePerToken = web3.utils.fromWei(pricePerToken, 'ether')
         return {pricePerToken: pricePerToken};
     }
 
