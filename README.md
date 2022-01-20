@@ -5,4 +5,4 @@ $npm install\
 $npm run dev
 
 Requirements:\
-MetaMask browser extension installed 
+MetaMask browser extension installed and connected to Rinkeby test network
