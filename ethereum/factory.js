@@ -3,8 +3,8 @@ import ElectionFactory from './build/ElectionFactory.json';
 
 const instance = new web3.eth.Contract(
     ElectionFactory.abi,
-    // "0x009D11A73aA3d9e61aE1c54d007823Cc2Dc152f5" // local
-    "0x54b6F20B4360401576075607f0ba52479a7f3F2f" // rinkeby
+    // "0x09Dfeda465fad49ff1C223C9B35784FDc58e7a93" // local
+    "0xFa81aeA5d740545ABe4C9D146033d4d8E08Cc898" // rinkeby
 );
 
 export default instance;

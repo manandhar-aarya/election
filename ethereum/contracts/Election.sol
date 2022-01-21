@@ -265,7 +265,7 @@ contract Vendor {
         require(sent, "Failed to transfer token to contract");
 
         // transfer ETH to the user
-        payable(msg.sender).transfer(weiAmount * 1e18);
+        payable(msg.sender).transfer(weiAmount);
     }
 
     /**
